@@ -41,6 +41,21 @@ Dashboard d’administration Laravel 11 avec Tailwind CSS, Heroicons, Toasts.
 - `resources/views/puces/`
 - `resources/views/kyc/`
 
+## API Documentation
+
+La documentation complète de l'API est disponible dans le fichier [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
+
+### Points d'entrée principaux :
+- Authentification (login/register)
+- Vérification d'email
+- Gestion des mots de passe oubliés
+- Profil utilisateur
+
+### Configuration requise
+- `Accept: application/json`
+- `Content-Type: application/json`
+- `Authorization: Bearer <token>` (pour les routes protégées)
+
 ## Export SQL
 Après migration, exporter la base vide :
 ```bash

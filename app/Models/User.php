@@ -6,10 +6,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -26,7 +27,7 @@ class User extends Authenticatable
      * - statut_kyc : NonSoumis, EnCours, Valide, Rejete
      */
     protected $fillable = [
-        'id', 'nom', 'prenom', 'email', 'status', 'statut_kyc',
+        'id', 'nom', 'prenom', 'email', 'status', 'statut_kyc', 'email_verification_code', 'reset_password_code',
         'password', 'remember_token', 'email_verified_at',
     ];
 
