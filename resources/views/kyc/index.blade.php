@@ -40,7 +40,7 @@
                 <tr>
                     <th class="px-4 py-2">ID</th>
                     <th class="px-4 py-2">Utilisateur</th>
-
+                    <th class="px-4 py-2">N° NPI</th>
                     <th class="px-4 py-2">Nationalité</th>
                     <th class="px-4 py-2">Téléphone</th>
                     <th class="px-4 py-2">Statut</th>
@@ -52,7 +52,7 @@
                 <tr>
                     <td class="px-4 py-2">{{ $kyc->id }}</td>
                     <td class="px-4 py-2">{{ $kyc->user->nom ?? '?' }} {{ $kyc->user->prenom ?? '' }} <span class='text-xs text-gray-500'>({{ $kyc->user->email ?? '' }})</span></td>
-
+                    <td class="px-4 py-2 font-mono">{{ $kyc->numero_npi }}</td>
                     <td class="px-4 py-2">{{ $kyc->nationalite }}</td>
                     <td class="px-4 py-2">{{ $kyc->telephone }}</td>
                     <td class="px-4 py-2">

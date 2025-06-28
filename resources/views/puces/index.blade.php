@@ -56,12 +56,6 @@
                                     @csrf
                                     <button type="submit" class="bg-gradient-to-r from-red-400 to-red-600 text-white px-3 py-1 rounded shadow text-xs">Libérer</button>
                                 </form>
-                            @else
-                                <form method="POST" action="{{ route('puces.assign', $puce) }}">
-                                    @csrf
-                                    <input type="hidden" name="client_id" value="">
-                                    <button type="submit" class="bg-gradient-to-r from-primary to-accent text-white px-3 py-1 rounded shadow text-xs">Attribuer</button>
-                                </form>
                             @endif
                         </td>
                     </tr>

@@ -26,6 +26,7 @@ Route::get('/admin/clients/{client}/edit', [ClientController::class, 'edit'])->n
 Route::put('/admin/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
 Route::post('/admin/clients/{client}/deactivate', [ClientController::class, 'deactivate'])->name('clients.deactivate');
 Route::get('/admin/clients/{client}/show', [ClientController::class, 'show'])->name('clients.show');
+Route::post('/admin/clients/{client}/puces/{puce}/remove', [ClientController::class, 'removePuce'])->name('clients.puces.remove');
 Route::post('/admin/clients/search', [ClientController::class, 'search'])->name('clients.search');
 
 // Puces

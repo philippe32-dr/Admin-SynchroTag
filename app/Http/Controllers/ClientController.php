@@ -80,8 +80,54 @@ class ClientController extends Controller
     public function update(UpdateClientRequest $request, Client $client)
     {
         $data = $request->validated();
-        $client->update(['statusActif' => $data['statusActif']]);
+        $client->update($data);
         return redirect()->route('clients.index')->with('success', 'Client mis à jour');
+    }
+    
+    /**
+     * Libère une puce d'un client
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Client  $client
+     * @param  \App\Models\Puce  $puce
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function removePuce(Request $request, Client $client, Puce $puce)
+    {
+        try {
+            // Vérifier que le client a bien cette puce
+            if ($puce->client_id !== $client->id) {
+                return back()->with('error', 'Erreur: Cette puce n\'est pas attribuée à ce client.');
+            }
+            
+            // Vérifier qu'il reste au moins une puce
+            $puceCount = $client->puces()->count();
+            if ($puceCount <= 1) {
+                return back()->with('error', 'Action impossible: Un client doit avoir au moins une puce attribuée.');
+            }
+            
+            // Libérer la puce
+            $puce->update([
+                'client_id' => null,
+                'status' => 'Libre'
+            ]);
+            
+            // Mettre à jour le statut de la puce
+            $puce->status = 'Libre';
+            $puce->save();
+            
+            // Rafraîchir la relation pour refléter les changements
+            $client->load('puces');
+            
+            return back()->with([
+                'success' => 'Succès: La puce a été libérée avec succès.',
+                'puce_name' => $puce->object_name ?? 'Puce ' . $puce->id
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la libération de la puce: ' . $e->getMessage());
+            return back()->with('error', 'Une erreur est survenue lors de la libération de la puce.');
+        }
     }
 
     // Désactivation client

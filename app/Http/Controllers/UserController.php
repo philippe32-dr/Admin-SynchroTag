@@ -61,8 +61,20 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user)
     {
         $data = $request->validated();
-        $user->update($data);
-        return redirect()->route('users.index')->with('success', 'Utilisateur modifié');
+        
+        // Gestion du mot de passe
+        if ($request->filled('password')) {
+            $data['password'] = bcrypt($data['password']);
+        } else {
+            unset($data['password']);
+        }
+        
+        try {
+            $user->update($data);
+            return redirect()->route('users.index')->with('success', 'Utilisateur modifié avec succès');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de la mise à jour de l\'utilisateur: ' . $e->getMessage());
+        }
     }
 
     // Désactive un utilisateur

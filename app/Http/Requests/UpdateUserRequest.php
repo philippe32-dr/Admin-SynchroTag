@@ -13,7 +13,8 @@ class UpdateUserRequest extends FormRequest
             'nom' => 'required|string|max:255',
             'prenom' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $this->user->id,
-            'status' => 'in:Active,Inactive',
+            'status' => 'required|in:Active,Inactive',
+            'password' => 'nullable|string|min:8|confirmed',
         ];
     }
 }

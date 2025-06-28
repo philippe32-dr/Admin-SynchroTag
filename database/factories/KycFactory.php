@@ -14,13 +14,13 @@ class KycFactory extends Factory
         return [
             'user_id' => null, // à remplir dans le seeder
             'client_id' => null,
+            'numero_npi' => (string) fake()->unique()->numberBetween(1000000000, 9999999999),
             'nom' => fake()->lastName(),
             'prenom' => fake()->firstName(),
             'nationalite' => fake()->country(),
             'telephone' => fake()->phoneNumber(),
             'adresse_postale' => fake()->address(),
-            'pdf_cip' => 'dummy.pdf',
-            'status' => fake()->randomElement(['EnCours','Valide','Rejete']),
+            'status' => 'EnCours',
         ];
     }
 }

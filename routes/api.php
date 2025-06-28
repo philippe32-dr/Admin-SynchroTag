@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PuceController;
+use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\KycController;
 // Route racine pour afficher la documentation de l'API
 Route::get('/', function () {
     return response()->json([
@@ -27,7 +30,21 @@ Route::post('/password/forgot', [AuthController::class, 'forgotPassword']);
 Route::post('/password/verify-code', [AuthController::class, 'verifyCode']);
 Route::post('/password/reset', [AuthController::class, 'resetPassword']);
 
+// Routes protégées par authentification
 Route::middleware('auth:sanctum')->group(function () {
+    // Authentification
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    
+    // Routes pour les puces
+    Route::get('/puces', [PuceController::class, 'index']);
+    Route::post('/puces/{puce}/assign-object', [PuceController::class, 'assignObject']);
+    Route::put('/puces/{puce}/update-object', [PuceController::class, 'updateObject']);
+    
+    // Routes pour le profil utilisateur
+    Route::put('/profile', [ProfileController::class, 'update']);
+    
+    // Routes pour les KYC
+    Route::post('/kyc', [KycController::class, 'store']);
+    Route::get('/kyc/status', [KycController::class, 'status']);
 });

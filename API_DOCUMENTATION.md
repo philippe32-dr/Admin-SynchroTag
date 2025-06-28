@@ -1,6 +1,6 @@
 # Documentation de l'API Admin-SynchroTag
 
-Cette documentation décrit les endpoints d'authentification de l'API Admin-SynchroTag, construite avec Laravel 11 et Laravel Sanctum pour l'authentification par token.
+Cette documentation décrit les endpoints de l'API Admin-SynchroTag, construite avec Laravel 11 et Laravel Sanctum pour l'authentification par token.
 
 ## Configuration requise
 
@@ -11,16 +11,23 @@ Cette documentation décrit les endpoints d'authentification de l'API Admin-Sync
   - `Authorization: Bearer <token>` (pour les routes protégées)
 
 ## Table des matières
-1. [Inscription](#inscription)
-2. [Vérification d'email](#vérification-demail)
-3. [Connexion](#connexion)
-4. [Déconnexion](#déconnexion)
-5. [Mot de passe oublié](#mot-de-passe-oublié)
-6. [Vérification du code de réinitialisation](#vérification-du-code-de-réinitialisation)
-7. [Réinitialisation du mot de passe](#réinitialisation-du-mot-de-passe)
-8. [Profil utilisateur](#profil-utilisateur)
-9. [Gestion des erreurs](#gestion-des-erreurs)
-10. [Notes importantes](#notes-importantes)
+1. [Authentification](#authentification)
+   - [Inscription](#inscription)
+   - [Vérification d'email](#vérification-demail)
+   - [Connexion](#connexion)
+   - [Déconnexion](#déconnexion)
+   - [Mot de passe oublié](#mot-de-passe-oublié)
+   - [Vérification du code de réinitialisation](#vérification-du-code-de-réinitialisation)
+   - [Réinitialisation du mot de passe](#réinitialisation-du-mot-de-passe)
+2. [Profil utilisateur](#profil-utilisateur)
+3. [Gestion des puces](#gestion-des-puces)
+   - [Lister les puces](#lister-les-puces)
+   - [Associer un objet à une puce](#associer-un-objet-à-une-puce)
+   - [Mettre à jour un objet](#mettre-à-jour-un-objet)
+4. [Gestion des KYC](#gestion-des-kyc)
+   - [Soumettre un KYC](#soumettre-un-kyc)
+   - [Vérifier le statut KYC](#vérifier-le-statut-kyc)
+5. [Gestion des erreurs](#gestion-des-erreurs)
 
 ## Inscription
 
@@ -264,6 +271,204 @@ Récupère les informations du profil de l'utilisateur connecté.
     "prenom": "Jean",
     "email": "jean.dupont@example.com",
     "statut_kyc": null
+  }
+  ```
+
+## Profil utilisateur
+
+### Mettre à jour le profil
+
+Met à jour les informations du profil de l'utilisateur connecté.
+
+- **URL** : `/profile`
+- **Méthode** : `PUT`
+- **Accès** : Authentifié
+- **En-têtes** :
+  - `Authorization: Bearer <token>`
+  - `Accept: application/json`
+  - `Content-Type: multipart/form-data`
+- **Corps de la requête** :
+  - `nom` (string, optionnel) : Nouveau nom
+  - `prenom` (string, optionnel) : Nouveau prénom
+  - `profile_photo` (file, optionnel) : Nouvelle photo de profil (max 2MB)
+
+- **Réponse de succès (200)** :
+  ```json
+  {
+    "user": {
+      "id": 1,
+      "nom": "Dupont",
+      "prenom": "Jean",
+      "email": "jean.dupont@example.com",
+      "profile_photo": "/storage/profiles/photo.jpg",
+      "statut_kyc": "EnCours"
+    }
+  }
+  ```
+
+## Gestion des puces
+
+### Lister les puces
+
+Récupère la liste des puces attribuées à l'utilisateur connecté.
+
+- **URL** : `/puces`
+- **Méthode** : `GET`
+- **Accès** : Authentifié
+- **En-têtes** :
+  - `Authorization: Bearer <token>`
+  - `Accept: application/json`
+
+- **Réponse de succès (200)** :
+  ```json
+  {
+    "puces": [
+      {
+        "id": 1,
+        "numero": "P123456789",
+        "status": "Attribuee",
+        "object_name": "Vélo électrique",
+        "object_photo": "/storage/objects/photo.jpg",
+        "object_photo_url": "http://example.com/storage/objects/photo.jpg",
+        "object_range": 100,
+        "client_id": 1
+      }
+    ]
+  }
+  ```
+
+### Associer un objet à une puce
+
+Associe un objet à une puce attribuée à l'utilisateur connecté.
+
+- **URL** : `/puces/{puce}/assign-object`
+- **Méthode** : `POST`
+- **Accès** : Authentifié
+- **En-têtes** :
+  - `Authorization: Bearer <token>`
+  - `Accept: application/json`
+  - `Content-Type: multipart/form-data`
+- **Paramètres de chemin** :
+  - `puce` (integer, requis) : ID de la puce
+- **Corps de la requête** :
+  - `object_name` (string, requis) : Nom de l'objet
+  - `object_photo` (file, requis) : Photo de l'objet (max 2MB)
+  - `object_range` (integer, requis) : Portée en mètres
+
+- **Réponse de succès (200)** :
+  ```json
+  {
+    "puce": {
+      "id": 1,
+      "numero_puce": "P123456789",
+      "status": "Attribuee",
+      "object_name": "Vélo électrique",
+      "object_photo": "/storage/objects/photo.jpg",
+      "object_photo_url": "http://example.com/storage/objects/photo.jpg",
+      "object_range": 100
+    }
+  }
+  ```
+
+- **Erreurs possibles** :
+  - `403` : Accès non autorisé (la puce n'appartient pas à l'utilisateur)
+  - `422` : Validation échouée ou la puce n'est pas attribuée
+
+### Mettre à jour un objet
+
+Met à jour les informations d'un objet associé à une puce.
+
+- **URL** : `/puces/{puce}/update-object`
+- **Méthode** : `PUT`
+- **Accès** : Authentifié
+- **En-têtes** :
+  - `Authorization: Bearer <token>`
+  - `Accept: application/json`
+  - `Content-Type: multipart/form-data`
+- **Paramètres de chemin** :
+  - `puce` (integer, requis) : ID de la puce
+- **Corps de la requête** :
+  - `object_name` (string, optionnel) : Nouveau nom de l'objet
+  - `object_photo` (file, optionnel) : Nouvelle photo de l'objet (max 2MB)
+  - `object_range` (integer, optionnel) : Nouvelle portée en mètres
+
+- **Réponse de succès (200)** : Similaire à la réponse de l'endpoint d'assignation
+
+## Gestion des KYC
+
+### Soumettre un KYC
+
+Soumet une demande de vérification d'identité (KYC).
+
+- **URL** : `/kyc`
+- **Méthode** : `POST`
+- **Accès** : Authentifié
+- **En-têtes** :
+  - `Authorization: Bearer <token>`
+  - `Accept: application/json`
+  - `Content-Type: application/json`
+- **Corps de la requête** :
+  ```json
+  {
+    "nom": "Dupont",
+    "prenom": "Jean",
+    "nationalite": "Française",
+    "telephone": "0612345678",
+    "adresse_postale": "123 rue de l'exemple, 75000 Paris",
+    "numero_npi": "1234567890",
+    "type_document": "CNI",
+    "numero_document": "12AB34567",
+    "date_emission": "2020-01-01",
+    "date_expiration": "2030-01-01"
+  }
+  ```
+
+- **Réponse de succès (200)** :
+  ```json
+  {
+    "message": "KYC soumis avec succès"
+  }
+  ```
+
+- **Erreurs possibles** :
+  - `422` : Validation échouée ou demande déjà en cours
+
+### Vérifier le statut KYC
+
+Récupère le statut de la demande KYC de l'utilisateur connecté.
+
+- **URL** : `/kyc/status`
+- **Méthode** : `GET`
+- **Accès** : Authentifié
+- **En-têtes** :
+  - `Authorization: Bearer <token>`
+  - `Accept: application/json`
+
+- **Réponse de succès (200) - KYC trouvé** :
+  ```json
+  {
+    "kyc": {
+      "id": 1,
+      "status": "EnCours",
+      "user_id": 1,
+      "numero_npi": "1234567890",
+      "nom": "Dupont",
+      "prenom": "Jean",
+      "nationalite": "Française",
+      "telephone": "0612345678",
+      "adresse_postale": "123 rue de l'exemple, 75000 Paris",
+      "type_document": "CNI",
+      "numero_document": "12AB34567",
+      "date_emission": "2020-01-01",
+      "date_expiration": "2030-01-01"
+    }
+  }
+  ```
+
+- **Réponse de succès (200) - Aucun KYC** :
+  ```json
+  {
+    "message": "Aucun KYC soumis"
   }
   ```
 
