@@ -17,10 +17,10 @@
                 <select name="user_id" required class="w-full border rounded px-3 py-2">
                     <option value="">Sélectionner un utilisateur</option>
                     @foreach($users as $user)
-                        <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                            {{ $user->prenom }} {{ $user->nom }} ({{ $user->email }})
-                        </option>
-                    @endforeach
+    <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
+        {{ $user->full_name }}
+    </option>
+@endforeach
                 </select>
                 @error('user_id')
                     <div class="text-red-500 text-xs mt-1">{{ $message }}</div>

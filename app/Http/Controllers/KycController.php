@@ -93,9 +93,7 @@ class KycController extends Controller
             ->map(function($user) {
                 $user->full_name = "{$user->prenom} {$user->nom} ({$user->email})";
                 return $user;
-            })
-            ->pluck('full_name', 'id');
-        
+            });        
         if ($users->isEmpty()) {
             return redirect()->route('kyc.index')
                 ->with('info', 'Aucun utilisateur ne nécessite de création de KYC pour le moment.');
