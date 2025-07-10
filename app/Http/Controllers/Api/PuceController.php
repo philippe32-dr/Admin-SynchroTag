@@ -11,12 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class PuceController extends Controller
 {
-    /**
-     * Liste des puces attribuées à l'utilisateur connecté
-     */
-    /**
-     * Liste des puces attribuées à l'utilisateur connecté
-     */
+    
     public function index(): JsonResponse
     {
         $user = auth()->user();
