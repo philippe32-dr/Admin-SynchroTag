@@ -51,3 +51,8 @@ Route::post('/admin/kyc/search', [App\Http\Controllers\KycController::class, 'se
 
 // Dashboard d'administration
 Route::get('/admin', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
+
+
+Route::put('/clients/{client}', [App\Http\Controllers\ClientController::class, 'update'])->name('clients.update');
+Route::post('/clients/{client}/puces/assign', [App\Http\Controllers\ClientController::class, 'assignPuces'])->name('clients.puces.assign');
+Route::post('/clients/{client}/puces/remove', [App\Http\Controllers\ClientController::class, 'removePuces'])->name('clients.puces.remove');

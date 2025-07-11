@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
-use App\Models\User;
 use App\Models\Puce;
+use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Requests\StoreClientRequest;
-use App\Http\Requests\UpdateClientRequest;
+use Illuminate\Support\Facades\Hash;
 
 class ClientController extends Controller
 {
@@ -21,7 +20,7 @@ class ClientController extends Controller
                 $q->where('nom', 'like', "%$search%")
                   ->orWhere('prenom', 'like', "%$search%")
                   ->orWhereHas('user', function($qu) use ($search) {
-                      $qu->where('email', 'like', "%$search%") ;
+                      $qu->where('email', 'like', "%$search%");
                   });
             });
         }
@@ -41,15 +40,15 @@ class ClientController extends Controller
     }
 
     // Sauvegarde nouveau client
-    public function store(StoreClientRequest $request)
+    public function store(Request $request)
     {
-        $data = $request->validated();
+        $data = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'puces' => 'required|array|exists:puces,id'
+        ]);
         $user = User::findOrFail($data['user_id']);
         if ($user->statut_kyc !== 'Valide') {
             return back()->withErrors(['user_id' => 'Utilisateur non éligible (KYC non validé)']);
-        }
-        if (empty($data['puces'])) {
-            return back()->withErrors(['puces' => 'Veuillez sélectionner au moins une puce.']);
         }
         $client = Client::create([
             'user_id' => $user->id,
@@ -57,14 +56,10 @@ class ClientController extends Controller
             'prenom' => $user->prenom,
             'statusActif' => 'Active',
         ]);
-        // Attribuer les puces
-        // On force l'attribution des puces sélectionnées, même si leur statut n'est pas 'Libre' (pour éviter tout bug de synchro)
         foreach ($data['puces'] as $puceId) {
             $puce = Puce::find($puceId);
             if ($puce) {
-                $puce->status = 'Attribuee';
-                $puce->client_id = $client->id;
-                $puce->save();
+                $puce->update(['status' => 'Attribuee', 'client_id' => $client->id]);
             }
         }
         return redirect()->route('clients.index')->with('success', 'Client créé avec succès');
@@ -73,63 +68,73 @@ class ClientController extends Controller
     // Formulaire édition
     public function edit(Client $client)
     {
-        return view('clients.edit', compact('client'));
-    }
-
-    // Mise à jour client
-    public function update(UpdateClientRequest $request, Client $client)
-    {
-        $data = $request->validated();
-        $client->update($data);
-        return redirect()->route('clients.index')->with('success', 'Client mis à jour');
+        $availablePuces = Puce::where('status', 'Libre')->orderBy('id')->get();
+        return view('clients.edit', compact('client', 'availablePuces'));
     }
     
-    /**
-     * Libère une puce d'un client
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Client  $client
-     * @param  \App\Models\Puce  $puce
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function removePuce(Request $request, Client $client, Puce $puce)
+    public function update(Request $request, Client $client)
     {
-        try {
-            // Vérifier que le client a bien cette puce
-            if ($puce->client_id !== $client->id) {
-                return back()->with('error', 'Erreur: Cette puce n\'est pas attribuée à ce client.');
-            }
-            
-            // Vérifier qu'il reste au moins une puce
-            $puceCount = $client->puces()->count();
-            if ($puceCount <= 1) {
-                return back()->with('error', 'Action impossible: Un client doit avoir au moins une puce attribuée.');
-            }
-            
-            // Libérer la puce
-            $puce->update([
-                'client_id' => null,
-                'status' => 'Libre'
+        $action = $request->input('action');
+        if ($action === 'update_client') {
+            $validatedData = $request->validate([
+                'statusActif' => 'required|in:Active,Inactive',
+                'password' => 'nullable|min:8|confirmed',
+                'password_confirmation' => 'required_with:password',
             ]);
-            
-            // Mettre à jour le statut de la puce
-            $puce->status = 'Libre';
-            $puce->save();
-            
-            // Rafraîchir la relation pour refléter les changements
-            $client->load('puces');
-            
-            return back()->with([
-                'success' => 'Succès: La puce a été libérée avec succès.',
-                'puce_name' => $puce->object_name ?? 'Puce ' . $puce->id
-            ]);
-            
-        } catch (\Exception $e) {
-            \Log::error('Erreur lors de la libération de la puce: ' . $e->getMessage());
-            return back()->with('error', 'Une erreur est survenue lors de la libération de la puce.');
-        }
-    }
 
+            $client->update(['statusActif' => $validatedData['statusActif']]);
+            
+            if ($request->filled('password')) {
+                $user = User::find($client->user_id);
+                if ($user) {
+                    $user->update(['password' => Hash::make($validatedData['password'])]);
+                }
+            }
+            
+            return redirect()->route('clients.edit', $client)->with('success', 'Client mis à jour avec succès');
+        }
+
+        if ($action === 'assign_puces') {
+            $validatedData = $request->validate([
+                'new_puces' => 'required|array|exists:puces,id'
+            ]);
+            
+            $puces = Puce::whereIn('id', $validatedData['new_puces'])->where('status', 'Libre')->get();
+            if ($puces->isEmpty()) {
+                return redirect()->route('clients.edit', $client)->with('error', 'Aucune puce valide sélectionnée pour l\'attribution.');
+            }
+            
+            foreach ($puces as $puce) {
+                $puce->update(['client_id' => $client->id, 'status' => 'Attribuee']);
+            }
+            
+            return redirect()->route('clients.edit', $client)->with('success', count($puces) . ' puce(s) attribuée(s) avec succès.');
+        }
+
+        if ($action === 'deassign_puces') {
+            $validatedData = $request->validate([
+                'deassign_puces' => 'required|array|exists:puces,id'
+            ]);
+            
+            if ($client->puces->count() <= count($validatedData['deassign_puces'])) {
+                return redirect()->route('clients.edit', $client)->with('error', 'Un client doit conserver au moins une puce.');
+            }
+            
+            $puces = Puce::whereIn('id', $validatedData['deassign_puces'])->where('client_id', $client->id)->get();
+            if ($puces->isEmpty()) {
+                return redirect()->route('clients.edit', $client)->with('error', 'Aucune puce valide sélectionnée pour la désattribution.');
+            }
+            
+            foreach ($puces as $puce) {
+                $puce->update(['client_id' => null, 'status' => 'Libre']);
+            }
+            
+            return redirect()->route('clients.edit', $client)->with('success', count($puces) . ' puce(s) désattribuée(s) avec succès.');
+        }
+
+        return redirect()->route('clients.edit', $client)->with('error', 'Aucune action valide spécifiée.');
+    }
+    
     // Désactivation client
     public function deactivate(Client $client)
     {

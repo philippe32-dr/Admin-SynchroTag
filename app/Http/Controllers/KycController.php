@@ -5,13 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Kyc;
 use App\Models\Client;
 use App\Models\User;
-use App\Models\Puce;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreKycRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class KycController extends Controller
 {

@@ -31,6 +31,18 @@ Dashboard d’administration Laravel 11 avec Tailwind CSS, Heroicons, Toasts.
    php artisan serve
    ```
 
+## Test
+
+- Tester via [http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin)
+- Utiliser Postman pour tester les endpoints API
+- Accéder à [http://127.0.0.1:8000/admin/clients/{id}/edit](http://127.0.0.1:8000/admin/clients/{id}/edit) pour tester la modification du mot de passe et l'attribution/désattribution des puces
+- Vérifier l'attribution/désattribution dynamique des puces sans rechargement de page
+
+## Vérifications
+
+- Confirmer l'absence d'erreurs dans `storage/logs/laravel.log`
+- Vérifier l'état des migrations avec `php artisan migrate:status`
+
 ## Structure du projet
 - `app/Models/`
 - `app/Http/Controllers/`

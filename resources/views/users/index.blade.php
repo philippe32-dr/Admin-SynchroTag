@@ -27,12 +27,12 @@
         {{-- Formulaire recherche/filtrage --}}
         <form method="GET" action="{{ route('users.index') }}" class="flex flex-wrap gap-2 items-center">
             <input type="text" name="q" placeholder="Nom, prénom ou email" value="{{ request('q') }}" class="border rounded p-2 focus:ring-primary" />
-            <select name="status" class="border rounded p-2">
+            <select name="status" class="border rounded px-6 py-2">
                 <option value="">Status</option>
                 <option value="Active" @if(request('status')=='Active') selected @endif>Active</option>
                 <option value="Inactive" @if(request('status')=='Inactive') selected @endif>Inactive</option>
             </select>
-            <select name="statut_kyc" class="border rounded p-2">
+            <select name="statut_kyc" class="border rounded px-6 py-2">
                 <option value="">Statut KYC</option>
                 <option value="NonSoumis" @if(request('statut_kyc')=='NonSoumis') selected @endif>Non soumis</option>
                 <option value="EnCours" @if(request('statut_kyc')=='EnCours') selected @endif>En cours</option>

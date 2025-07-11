@@ -20,7 +20,7 @@
     </div>
     <form method="GET" action="{{ route('clients.index') }}" class="flex flex-wrap gap-4 mb-4">
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Rechercher nom, prénom, email..." class="px-3 py-2 border rounded w-64">
-        <select name="statusActif" class="px-3 py-2 border rounded">
+        <select name="statusActif" class="px-6 py-2 border rounded">
             <option value="">Tous statuts</option>
             <option value="Active" @if(request('statusActif')=='Active') selected @endif>Actif</option>
             <option value="Inactive" @if(request('statusActif')=='Inactive') selected @endif>Inactif</option>

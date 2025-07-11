@@ -18,7 +18,7 @@
         <div class="font-semibold">Statut :</div>
         <span class="px-2 py-1 rounded text-xs @if($client->statusActif=='Active') bg-green-100 text-green-700 @else bg-red-100 text-red-700 @endif">{{ $client->statusActif }}</span>
     </div>
-    <div class="mb-6">
+    <div class="mb-4">
         <div class="font-semibold">Puces attribuées :</div>
         <ul class="list-disc ml-6">
             @php
