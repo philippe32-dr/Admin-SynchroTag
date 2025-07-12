@@ -20,12 +20,12 @@
     </div>
     <form method="GET" action="{{ route('puces.index') }}" class="flex flex-wrap gap-4 mb-4">
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Rechercher clé unique..." class="px-3 py-2 border rounded w-64">
-        <select name="status" class="px-3 py-2 border rounded">
+        <select name="status" class="px-6 py-2 border rounded">
             <option value="">Tous statuts</option>
             <option value="Libre" @if(request('status')=='Libre') selected @endif>Libre</option>
             <option value="Attribuee" @if(request('status')=='Attribuee') selected @endif>Attribuée</option>
         </select>
-        <button type="submit" class="bg-gradient-to-r from-primary to-accent text-white px-4 py-2 rounded hover:scale-105 transition">Filtrer</button>
+        <button type="submit" class="bg-gradient-to-r from-primary to-accent text-white px-6 py-2 rounded hover:scale-105 transition">Filtrer</button>
     </form>
     <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
         <table class="min-w-full divide-y divide-gray-200">
@@ -33,9 +33,8 @@
                 <tr>
                     <th class="px-4 py-2">ID</th>
                     <th class="px-4 py-2">Clé unique</th>
-                    <th class="px-4 py-2">Latitude</th>
-                    <th class="px-4 py-2">Longitude</th>
                     <th class="px-4 py-2">Statut</th>
+                    <th class="px-4 py-2">Utilisateur</th>
                     <th class="px-4 py-2">Actions</th>
                 </tr>
             </thead>
@@ -44,10 +43,15 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-2">{{ $puce->id }}</td>
                         <td class="px-4 py-2">{{ $puce->cle_unique }}</td>
-                        <td class="px-4 py-2">{{ $puce->latitude }}</td>
-                        <td class="px-4 py-2">{{ $puce->longitude }}</td>
                         <td class="px-4 py-2">
                             <span class="px-2 py-1 rounded text-xs @if($puce->status=='Libre') bg-gray-100 text-gray-500 @else bg-blue-100 text-blue-700 @endif">{{ $puce->status }}</span>
+                        </td>
+                        <td class="px-4 py-2">
+                            @if($puce->status === 'Attribuee' && $puce->client && $puce->client->user)
+                                {{ $puce->client->user->prenom }} {{ $puce->client->user->nom }} ({{ $puce->client->user->email }})
+                            @else
+                                Néant
+                            @endif
                         </td>
                         <td class="px-4 py-2 flex gap-2 justify-center">
                             <a href="{{ route('puces.edit', $puce) }}" class="bg-gradient-to-r from-primary to-accent text-white px-3 py-1 rounded shadow text-xs">Modifier</a>

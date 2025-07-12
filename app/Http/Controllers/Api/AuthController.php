@@ -9,11 +9,13 @@ use App\Http\Requests\Api\Auth\VerifyEmailRequest;
 use App\Http\Requests\Api\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Api\Auth\VerifyCodeRequest;
 use App\Http\Requests\Api\Auth\ResetPasswordRequest;
+use App\Http\Requests\Api\Auth\UpdateProfileRequest;
 use App\Mail\VerificationCodeEmail;
 use App\Mail\ResetPasswordCodeEmail;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
@@ -25,6 +27,12 @@ class AuthController extends Controller
         $data['password'] = Hash::make($data['password']);
         $verificationCode = (string) random_int(100000, 999999);
         $data['email_verification_code'] = $verificationCode;
+
+        // Gestion de la photo de profil
+        if ($request->hasFile('photo_profil')) {
+            $path = $request->file('photo_profil')->store('profiles', 'public');
+            $data['photo_profil'] = $path;
+        }
 
         $user = User::create($data);
 
@@ -238,7 +246,53 @@ class AuthController extends Controller
     // Profil utilisateur
     public function user(): JsonResponse
     {
-        $u = request()->user();
-        return response()->json($u->only('id', 'nom', 'prenom', 'email', 'statut_kyc'));
+        $user = auth()->user();
+        return response()->json([
+            'id' => $user->id,
+            'nom' => $user->nom,
+            'prenom' => $user->prenom,
+            'email' => $user->email,
+            'telephone' => $user->telephone,
+            'photo_profil_url' => $user->photo_profil_url,
+            'statut_kyc' => $user->statut_kyc,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at
+        ]);
+    }
+
+    /**
+     * Mettre à jour le profil utilisateur
+     */
+    public function updateProfile(UpdateProfileRequest $request): JsonResponse
+    {
+        $user = auth()->user();
+        $data = $request->validated();
+
+        // Gestion de la photo de profil
+        if ($request->hasFile('photo_profil')) {
+            // Supprimer l'ancienne photo si elle existe
+            if ($user->photo_profil) {
+                Storage::delete('public/' . $user->photo_profil);
+            }
+            
+            // Stocker la nouvelle photo
+            $path = $request->file('photo_profil')->store('profiles', 'public');
+            $data['photo_profil'] = $path;
+        }
+
+        $user->update($data);
+
+        return response()->json([
+            'message' => 'Profil mis à jour avec succès',
+            'user' => [
+                'id' => $user->id,
+                'nom' => $user->nom,
+                'prenom' => $user->prenom,
+                'email' => $user->email,
+                'telephone' => $user->telephone,
+                'photo_profil_url' => $user->photo_profil_url,
+                'statut_kyc' => $user->statut_kyc,
+            ]
+        ]);
     }
 }

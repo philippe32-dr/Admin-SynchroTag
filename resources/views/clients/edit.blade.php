@@ -8,9 +8,10 @@
         {{ $client->prenom }} {{ $client->nom }}
     </h2>
     
-    <form method="POST" action="{{ route('clients.update', $client) }}">
+    <form method="POST" action="{{ route('clients.update', $client) }}" id="client-form">
         @csrf
         @method('PUT')
+        <input type="hidden" name="action" value="update_client">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Informations du client -->
             <div class="bg-gray-50 p-6 rounded-lg border border-gray-100 mb-6">
@@ -18,15 +19,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="nom" class="block text-sm font-medium text-gray-600">Nom</label>
-                        <input type="text" name="nom" id="nom" value="{{ old('nom', $client->nom) }}" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-accent focus:border-accent" disabled>
+                        <input type="text" name="nom" id="nom" value="{{ old('nom', $client->nom) }}" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-accent focus:border-accent">
                     </div>
                     <div>
                         <label for="prenom" class="block text-sm font-medium text-gray-600">Prénom</label>
-                        <input type="text" name="prenom" id="prenom" value="{{ old('prenom', $client->prenom) }}" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-accent focus:border-accent" disabled>
+                        <input type="text" name="prenom" id="prenom" value="{{ old('prenom', $client->prenom) }}" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-accent focus:border-accent">
                     </div>
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
-                        <input type="email" name="email" id="email" value="{{ old('email', $client->email) }}" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-accent focus:border-accent" disabled>
+                        <input type="email" name="email" id="email" value="{{ old('email', $client->user->email) }}" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-accent focus:border-accent">
                     </div>
                     <div>
                         <label for="statusActif" class="block text-sm font-medium text-gray-600">Statut</label>

@@ -272,7 +272,7 @@ class KycController extends Controller
     public function validateKyc(Request $request, Kyc $kyc)
     {
         // Vérifier que le KYC est bien en statut 'EnCours'
-        if (!$kyc->isEnCours()) {
+        if ($kyc->status !== 'EnCours') {
             return redirect()->route('kyc.show', $kyc)
                 ->with('error', 'Seul un KYC en cours peut être validé.');
         }
@@ -280,10 +280,9 @@ class KycController extends Controller
         // Valider la requête
         $validated = $request->validate([
             'creer_client' => 'sometimes|boolean',
-            'attribuer_puce' => 'required_with:creer_client|boolean',
-            'puce_id' => 'required_if:attribuer_puce,1|exists:puces,id,status,' . Puce::STATUS_LIBRE,
+            'attribuer_puce' => 'sometimes|boolean',
+            'puce_id' => 'nullable|exists:puces,id,status,Libre'
         ], [
-            'puce_id.required_if' => 'Veuillez sélectionner une puce à attribuer.',
             'puce_id.exists' => 'La puce sélectionnée n\'est pas disponible ou n\'existe pas.'
         ]);
         
@@ -297,43 +296,11 @@ class KycController extends Controller
             $kyc->raison_rejet = null; // Effacer toute raison de rejet précédente
             $kyc->save();
             
-            // Mettre à jour le statut de l'utilisateur
-            $kyc->user->statut_kyc = User::KYC_VALIDE;
+            // Mettre à jour le statut KYC de l'utilisateur
+            $kyc->user->statut_kyc = Kyc::STATUS_VALIDE;
             $kyc->user->save();
             
-            $message = 'KYC validé avec succès';
-            
-            // Créer automatiquement un client si demandé
-            if ($request->boolean('creer_client', false)) {
-                $client = $this->creerClientDepuisKyc($kyc);
-                
-                // Lier automatiquement une puce si demandé
-                if ($request->boolean('attribuer_puce', false)) {
-                    $puceId = $request->input('puce_id');
-                    $puce = Puce::findOrFail($puceId);
-                    
-                    // Vérifier que la puce est bien libre
-                    if ($puce->statut !== Puce::STATUS_LIBRE) {
-                        throw new \Exception('La puce sélectionnée n\'est plus disponible.');
-                    }
-                    
-                    // Attribuer la puce au client
-                    $puce->client_id = $client->id;
-                    $puce->statut = Puce::STATUS_ATTRIBUEE;
-                    $puce->date_activation = now();
-                    $puce->save();
-                    
-                    $message .= ' et client créé avec la puce ' . $puce->numero_serie . ' attribuée.';
-                } else {
-                    $message .= ' et client créé sans attribution de puce.';
-                }
-                
-                // Ajouter un message si des puces sont disponibles mais non attribuées
-                $pucesDisponibles = Puce::where('statut', Puce::STATUS_LIBRE)->exists();
-                if ($pucesDisponibles && !$request->boolean('attribuer_puce', false)) {
-                    session()->flash('info', 'Des puces sont disponibles pour attribution.');
-                }
-            }
+            $message = 'KYC validé avec succès. L\'utilisateur peut maintenant se connecter.';
             
             DB::commit();
             
@@ -341,8 +308,8 @@ class KycController extends Controller
                 'kyc_id' => $kyc->id,
                 'user_id' => $kyc->user_id,
                 'validated_by' => auth()->id(),
-                'client_created' => $request->boolean('creer_client', false),
-                'puce_attribuee' => $request->boolean('attribuer_puce', false)
+                'client_created' => false,
+                'puce_attribuee' => false
             ]);
             
             return redirect()->route('kyc.show', $kyc)

@@ -36,19 +36,61 @@ class User extends Authenticatable
     public const KYC_REJETE = 'Rejete';
 
     protected $fillable = [
-        'id', 'nom', 'prenom', 'email', 'status', 'statut_kyc', 'profile_photo',
-        'email_verification_code', 'reset_password_code', 'password', 'remember_token', 'email_verified_at',
+        'nom',
+        'prenom',
+        'email',
+        'password',
+        'status',
+        'statut_kyc',
+        'telephone',
+        'adresse',
+        'date_naissance',
+        'lieu_naissance',
+        'nationalite',
+        'type_piece_identite',
+        'numero_piece_identite',
+        'date_emission_piece',
+        'date_expiration_piece',
+        'adresse_postale',
+        'code_postal',
+        'ville',
+        'pays',
+        'photo_profil',
+        'piece_identite_recto',
+        'piece_identite_verso',
+        'justificatif_domicile',
+        'email_verified_at',
+        'remember_token',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    protected $appends = ['photo_profil_url'];
+
+    /**
+     * Get the URL for the user's profile photo.
+     *
+     * @return string
+     */
+    public function getPhotoProfilUrlAttribute()
+    {
+        if (!$this->photo_profil) {
+            return null;
+        }
+        
+        if (str_starts_with($this->photo_profil, 'http')) {
+            return $this->photo_profil;
+        }
+        
+        return asset('storage/' . ltrim($this->photo_profil, '/'));
+    }
     
     /**
      * Get the client associated with the user.

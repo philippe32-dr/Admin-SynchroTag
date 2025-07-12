@@ -19,6 +19,8 @@ class Puce extends Model
         'object_name', 'object_photo', 'object_range'
     ];
 
+    protected $appends = ['object_photo_url'];
+
     /**
      * Règles de validation pour une puce
      *
@@ -49,7 +51,8 @@ class Puce extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'object_photos' => 'array',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function client()
@@ -58,7 +61,7 @@ class Puce extends Model
     }
     
     /**
-     * Get the URL of the object photo
+     * Get the full URL for the object photo
      */
     public function getObjectPhotoUrlAttribute()
     {

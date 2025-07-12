@@ -4,14 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Historique;
 
 class Client extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'nom', 'prenom', 'statusActif',
+        'nom',
+        'prenom',
+        'adresse',
+        'telephone',
+        'email',
+        'user_id',
+        'statusActif'
     ];
+
+    public function historiques()
+    {
+        return $this->hasMany(Historique::class);
+    }
 
     public function user()
     {

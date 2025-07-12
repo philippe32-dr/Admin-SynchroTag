@@ -69,29 +69,46 @@ class ClientController extends Controller
     public function edit(Client $client)
     {
         $availablePuces = Puce::where('status', 'Libre')->orderBy('id')->get();
+        $client->load('user'); // Charger la relation user
         return view('clients.edit', compact('client', 'availablePuces'));
     }
     
     public function update(Request $request, Client $client)
     {
-        $action = $request->input('action');
+        $action = $request->input('action', 'update_client');
+        
         if ($action === 'update_client') {
-            $validatedData = $request->validate([
-                'statusActif' => 'required|in:Active,Inactive',
-                'password' => 'nullable|min:8|confirmed',
-                'password_confirmation' => 'required_with:password',
-            ]);
-
-            $client->update(['statusActif' => $validatedData['statusActif']]);
+            // Règles de validation minimales
+            $rules = [
+                'nom' => 'nullable|string|max:255',
+                'prenom' => 'nullable|string|max:255',
+                'email' => 'nullable|email|max:255|unique:users,email,' . ($client->user_id ?? 'NULL') . ',id',
+                'statusActif' => 'nullable|in:Active,Inactive',
+                'password' => 'nullable|confirmed|min:8',
+            ];
             
-            if ($request->filled('password')) {
-                $user = User::find($client->user_id);
-                if ($user) {
-                    $user->update(['password' => Hash::make($validatedData['password'])]);
+            // Validation des données
+            $validatedData = $request->validate($rules);
+            
+            // Mise à jour du client
+            $client->fill($request->only(['nom', 'prenom', 'statusActif']));
+            $client->save();
+            
+            // Mise à jour de l'utilisateur associé
+            if ($client->user) {
+                $user = $client->user;
+                $userData = $request->only(['nom', 'prenom', 'email']);
+                
+                // Ne mettre à jour le mot de passe que s'il est fourni
+                if ($request->filled('password')) {
+                    $userData['password'] = Hash::make($request->password);
                 }
+                
+                $user->fill($userData);
+                $user->save();
             }
             
-            return redirect()->route('clients.edit', $client)->with('success', 'Client mis à jour avec succès');
+            return redirect()->route('clients.index')->with('success', 'Client mis à jour avec succès');
         }
 
         if ($action === 'assign_puces') {

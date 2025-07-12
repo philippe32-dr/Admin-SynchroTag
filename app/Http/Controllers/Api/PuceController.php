@@ -47,8 +47,14 @@ class PuceController extends Controller
         
         // Gestion du téléchargement de la photo
         if ($request->hasFile('object_photo')) {
-            $path = $request->file('object_photo')->store('public/objects');
-            $data['object_photo'] = Storage::url($path);
+            // Supprimer l'ancienne photo si elle existe
+            if ($puce->object_photo) {
+                Storage::delete('public/' . $puce->object_photo);
+            }
+            
+            // Stocker la nouvelle photo
+            $path = $request->file('object_photo')->store('objects', 'public');
+            $data['object_photo'] = $path;
         }
         
         $puce->update($data);
@@ -74,12 +80,12 @@ class PuceController extends Controller
         if ($request->hasFile('object_photo')) {
             // Supprimer l'ancienne photo si elle existe
             if ($puce->object_photo) {
-                $oldPath = str_replace('/storage', 'public', $puce->object_photo);
-                Storage::delete($oldPath);
+                Storage::delete('public/' . $puce->object_photo);
             }
             
-            $path = $request->file('object_photo')->store('public/objects');
-            $data['object_photo'] = Storage::url($path);
+            // Stocker la nouvelle photo
+            $path = $request->file('object_photo')->store('objects', 'public');
+            $data['object_photo'] = $path;
         }
         
         $puce->update($data);

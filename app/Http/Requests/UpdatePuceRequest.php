@@ -17,8 +17,9 @@ class UpdatePuceRequest extends FormRequest
             'cle_unique' => 'required|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
-            'status' => 'in:Libre,Attribuee',
+            'status' => 'required|in:Libre,Attribuee',
             'client_id' => 'nullable|exists:clients,id',
+            'user_id' => 'nullable|exists:users,id',
         ];
     }
 }
