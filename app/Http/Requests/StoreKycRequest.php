@@ -33,6 +33,8 @@ class StoreKycRequest extends FormRequest
                 // S'assurer que l'utilisateur n'a pas déjà un KYC (sauf si c'est une mise à jour)
                 Rule::unique('kycs', 'user_id')->ignore($kycId)
             ],
+            'photo_recto' => ['nullable', 'image', 'mimes:jpg,png', 'max:5120'],
+            'photo_verso' => ['nullable', 'image', 'mimes:jpg,png', 'max:5120'],
             'nom' => 'required|string|max:255',
             'prenom' => 'required|string|max:255',
             'nationalite' => 'required|string|max:100',

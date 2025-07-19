@@ -35,6 +35,8 @@ class Kyc extends Model
         'numero_npi',
         'status',
         'raison_rejet',
+        'photo_recto',
+        'photo_verso',
     ];
 
     /**

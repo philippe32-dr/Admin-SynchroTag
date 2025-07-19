@@ -63,6 +63,20 @@
                 @enderror
             </div>
 
+            <div class="mb-4">
+                <label class="block mb-1 font-semibold">Photo recto de la pièce d'identité <span class="text-gray-400">(jpg/png, max 5Mo)</span></label>
+                <input type="file" name="photo_recto" accept="image/jpeg,image/png" class="w-full border rounded px-3 py-2 file:bg-primary file:text-white file:rounded file:px-3 file:py-1">
+                @error('photo_recto')
+                    <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="mb-6">
+                <label class="block mb-1 font-semibold">Photo verso de la pièce d'identité <span class="text-gray-400">(jpg/png, max 5Mo)</span></label>
+                <input type="file" name="photo_verso" accept="image/jpeg,image/png" class="w-full border rounded px-3 py-2 file:bg-primary file:text-white file:rounded file:px-3 file:py-1">
+                @error('photo_verso')
+                    <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                @enderror
+            </div>
             <div class="flex justify-end gap-2 pt-4 border-t border-gray-200">
                 <a href="{{ route('kyc.index') }}" class="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors">
                     Annuler

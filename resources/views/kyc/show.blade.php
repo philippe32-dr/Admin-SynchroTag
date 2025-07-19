@@ -25,6 +25,28 @@
         <span class="font-mono bg-gray-100 px-2 py-1 rounded">{{ $kyc->numero_npi }}</span>
     </div>
     <div class="mb-6">
+        <span class="font-semibold">Photo recto :</span>
+        @if($kyc->photo_recto)
+            <div class="mt-2 flex items-center gap-4">
+                <img src="{{ asset('storage/' . $kyc->photo_recto) }}" alt="Recto pièce d'identité" class="h-32 rounded shadow border">
+                <a href="{{ asset('storage/' . $kyc->photo_recto) }}" download class="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm">Télécharger</a>
+            </div>
+        @else
+            <span class="text-gray-400">Non fourni</span>
+        @endif
+    </div>
+    <div class="mb-6">
+        <span class="font-semibold">Photo verso :</span>
+        @if($kyc->photo_verso)
+            <div class="mt-2 flex items-center gap-4">
+                <img src="{{ asset('storage/' . $kyc->photo_verso) }}" alt="Verso pièce d'identité" class="h-32 rounded shadow border">
+                <a href="{{ asset('storage/' . $kyc->photo_verso) }}" download class="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm">Télécharger</a>
+            </div>
+        @else
+            <span class="text-gray-400">Non fourni</span>
+        @endif
+    </div>
+    <div class="mb-6">
         <span class="font-semibold">Statut :</span>
         <span class="px-2 py-1 rounded {{ $kyc->status=='Valide' ? 'bg-green-100 text-green-700' : ($kyc->status=='Rejete' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') }}">
             {{ $kyc->status }}
@@ -45,6 +67,7 @@
             </div>
         @endif
     </div>
+    
     <div class="flex justify-end gap-2">
         @if($kyc->status !== 'Valide' && $kyc->status !== 'Rejete')
             <form action="{{ route('kyc.validate', $kyc) }}" method="POST" class="inline">

@@ -105,8 +105,18 @@ class KycController extends Controller
         try {
             DB::beginTransaction();
             
-            // Créer le KYC avec les données validées
-            $kyc = new Kyc($request->validated());
+            // Gérer l'upload des fichiers recto/verso
+            $data = $request->validated();
+            if ($request->hasFile('photo_recto')) {
+                $path = $request->file('photo_recto')->store('kyc_docs', 'public');
+                $data['photo_recto'] = $path;
+            }
+            if ($request->hasFile('photo_verso')) {
+                $path = $request->file('photo_verso')->store('kyc_docs', 'public');
+                $data['photo_verso'] = $path;
+            }
+            // Créer le KYC avec les données validées et chemins fichiers
+            $kyc = new Kyc($data);
             $kyc->user_id = $user->id;
             $kyc->status = Kyc::STATUS_EN_COURS;
             $kyc->save();
@@ -129,7 +139,13 @@ class KycController extends Controller
                 self::HTTP_STATUS['created'],
                 [
                     'status' => $kyc->status,
-                    'data' => $kyc->only(['id', 'status', 'created_at'])
+                    'data' => [
+                        'id' => $kyc->id,
+                        'status' => $kyc->status,
+                        'created_at' => $kyc->created_at,
+                        'photo_recto_url' => $kyc->photo_recto ? asset('storage/' . $kyc->photo_recto) : null,
+                        'photo_verso_url' => $kyc->photo_verso ? asset('storage/' . $kyc->photo_verso) : null
+                    ]
                 ]
             );
             

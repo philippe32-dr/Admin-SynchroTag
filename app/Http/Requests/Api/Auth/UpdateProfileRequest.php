@@ -25,7 +25,6 @@ class UpdateProfileRequest extends FormRequest
         return [
             'nom' => ['sometimes', 'string', 'max:255'],
             'prenom' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users')->ignore(auth()->id())],
             'telephone' => ['sometimes', 'string', 'max:20'],
             'photo_profil' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ];

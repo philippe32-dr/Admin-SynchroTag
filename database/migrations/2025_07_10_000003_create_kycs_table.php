@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('adresse_postale');
             $table->string('numero_npi', 10);
             $table->enum('status', ['EnCours', 'Valide', 'Rejete'])->default('EnCours');
+            $table->string('photo_recto')->nullable();
+            $table->string('photo_verso')->nullable();
             $table->timestamp('validated_at')->nullable();
             $table->foreignId('validated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('rejected_at')->nullable();
